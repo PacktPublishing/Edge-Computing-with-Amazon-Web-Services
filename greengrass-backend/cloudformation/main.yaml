@@ -1,0 +1,332 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Greengrass Demo Environment
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Prerequisites - these must exist before running this template bundle
+        Parameters:
+          - S3Bucket
+          - S3Path
+      - Label:
+          default: Overall Environment Parameters
+        Parameters:
+          - EnvironmentTag
+    ParameterLabels:
+      EnvironmentTag:
+        default: Environment type to tag this instance as
+      S3Bucket:
+        default: S3 Bucket containing dependencies of this solution
+      S3Path:
+        default: S3 Prefix/Directory where the root of our content tree lives
+Parameters:
+  EnvironmentTag:
+    Description: Tag for reporting 
+    Type: String
+    Default: "GreengrassEnvironmentA"
+    AllowedValues:
+      - "GreengrassEnvironmentA"
+      - "GreengrassEnvironmentB"
+      - "GreengrassEnvironmentC"
+      - "GreengrassEnvironmentD"
+  S3Bucket:
+    Type: String
+    Description: just the s3 bucket base name, i.e. mys3bucket
+  S3Path:
+    Type: String
+    Description: just the base prefix with no slashes on either end i.e. cloudformation
+Resources:
+  FleetProvisioningPolicies:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        EnvironmentTag:
+          Ref: EnvironmentTag
+        ProvisioningTemplateName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "iot-prov-template-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId" 
+        GGTokenExchangeRoleName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "greengrass-token-exchange-role-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+        GGFleetProvisioningRoleName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "greengrass-fleet-provisioning-role-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+        GGDeviceDefaultPolicyName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "greengrass-device-default-policy-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+        GGProvisioningClaimPolicyName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "greengrass-provisioning-claim-policy-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+        SSMRoleName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "ssm-role-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+        GGServiceRoleName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "greengrass-service-role-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+      TemplateURL:
+        Fn::Join:
+          - ""
+          - - "https://"
+            - Ref: S3Bucket
+            - ".s3.amazonaws.com/"
+            - Ref: S3Path
+            - "/fleet-provisioning.yaml"
+  IOTconstructs:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        ClientDevicePolicyName:    
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "client-device-policy-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+        ClientDeviceGroupName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "client-device-group-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+        IotCoreMappingName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "iot-core-mapping-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+        MQTTTopicName: 
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "customers/"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+                  - "/"
+                  - Ref: "AWS::Region"
+                  - "/+"
+        EnvironmentTag:
+          Ref: EnvironmentTag
+        SSMRoleName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "ssm-role-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+        ThingGroupName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "thing-group-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+        DeploymentName:
+          Fn::Join:
+            - ""
+            - - ""
+              - Fn::Join:
+                - ""
+                - - "greengrass-deployment-"
+                  - Ref: "AWS::Region"
+                  - "-"
+                  - Fn::Select:
+                    - 0
+                    - Fn::Split:
+                      - "-"
+                      - Fn::Select:
+                        - 2
+                        - Fn::Split:
+                          - "/"
+                          - !Ref "AWS::StackId"
+      TemplateURL:
+        Fn::Join:
+          - ""
+          - - "https://"
+            - Ref: S3Bucket
+            - ".s3.amazonaws.com/"
+            - Ref: S3Path
+            - "/iot-constructs.yaml"
+Outputs:
+  GreengrassServiceRole:
+    Description: Attach this under AWS IoT > Settings > Greengrass service role
+    Value:
+      Fn::GetAtt:
+        - FleetProvisioningPolicies
+        - Outputs.GGServiceRole
+  GreengrassProvisioningClaimPolicy:
+     Description: Attach this under AWS IoT > Security > Certificates 
+     Value: 
+      Fn::GetAtt:
+        - FleetProvisioningPolicies
+        - Outputs.GGProvisioningClaimPolicy

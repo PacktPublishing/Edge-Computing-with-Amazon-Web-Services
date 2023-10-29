@@ -1,0 +1,151 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS IoT and Greengrass configuration constructs
+Parameters:
+  ThingGroupName:
+    Type: String
+  EnvironmentTag:
+    Type: String
+  DeploymentName:
+    Type: String
+  SSMRoleName:
+    Type: String
+  ClientDevicePolicyName:
+    Type: String
+  ClientDeviceGroupName:
+    Type: String
+  IotCoreMappingName:
+    Type: String
+  MQTTTopicName:
+    Type: String
+Resources:
+  ThingGroup:
+    Type: AWS::IoT::ThingGroup
+    Properties:
+      ThingGroupName:
+        Ref: ThingGroupName
+      ThingGroupProperties:
+        AttributePayload:
+          Attributes:
+            Environment: EnvironmentTag
+        ThingGroupDescription:
+          Fn::Join:
+            - ""
+            - - "Members of Environment: "
+              - Ref: EnvironmentTag
+      Tags:
+        - Key: Name
+          Value:
+            Ref: ThingGroupName
+        - Key: EnvironmentTag
+          Value:
+            Ref: EnvironmentTag
+  GreengrassDeployment:
+    Type: AWS::GreengrassV2::Deployment
+    Properties:
+      TargetArn:
+        Fn::GetAtt:
+          - ThingGroup
+          - Arn
+      DeploymentName:
+        Ref: DeploymentName
+      Components:
+        aws.greengrass.DiskSpooler:
+          ComponentVersion: 1.0.0
+        aws.greengrass.DockerApplicationManager:
+          ComponentVersion: 2.0.10
+        aws.greengrass.LambdaLauncher:
+          ComponentVersion: 2.0.10
+        aws.greengrass.LambdaManager:
+          ComponentVersion: 2.2.10
+        aws.greengrass.LambdaRuntimes:
+          ComponentVersion: 2.0.8
+        aws.greengrass.LogManager:
+          ComponentVersion: 2.3.5
+          ConfigurationUpdate:
+            Merge: '{"logsUploaderConfiguration":{"systemLogsConfiguration":{"uploadToCloudWatch":"true","minimumLogLevel":"DEBUG","diskSpaceLimit":"10","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"componentLogsConfigurationMap":{"aws.greengrass.LogManager":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.SecureTunneling":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.Nucleus":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.SystemsManagerAgent":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.LambdaManager":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.clientdevices.mqtt.Bridge":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.clientdevices.mqtt.Moquette":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.DockerApplicationManager":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.Modbus":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.LambdaLauncher":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.LambdaRuntimes":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.DiskSpooler":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.clientdevices.IPDetector":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.clientdevices.Auth":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"},"aws.greengrass.TokenExchangeService":{"minimumLogLevel":"INFO","diskSpaceLimit":"20","diskSpaceLimitUnit":"MB","deleteLogFileAfterCloudUpload":"true"}}},"periodicUploadIntervalSec":"120"}'
+          RunWith:
+            PosixUser: "0:0"
+        aws.greengrass.Modbus:
+          ComponentVersion: 2.1.7
+        aws.greengrass.Nucleus:
+          ComponentVersion: 2.11.0
+          ConfigurationUpdate:
+            Merge: '{"httpClient":{"connectionTimeoutMs":4000,"socketTimeoutMs":90000}}'
+          RunWith: {}
+        aws.greengrass.SecureTunneling:
+          ComponentVersion: 1.0.16
+          RunWith:
+            PosixUser: "0:0"
+        aws.greengrass.SystemsManagerAgent:
+          ComponentVersion: 1.0.0
+          ConfigurationUpdate:
+            Merge: !Sub '{"SSMRegistrationRole":"${SSMRoleName}"}'
+          RunWith: {}
+        aws.greengrass.TokenExchangeService:
+          ComponentVersion: 2.0.3
+          RunWith:
+            PosixUser: "0:0"
+        aws.greengrass.clientdevices.Auth:
+          ComponentVersion: 2.4.3
+          ConfigurationUpdate:
+            Merge: !Sub '{"deviceGroups":{"formatVersion":"2021-03-05","definitions":{"${ClientDeviceGroupName}":{"selectionRule":"thingName: *","policyName":"${ClientDevicePolicyName}"}},"policies":{"${ClientDevicePolicyName}":{"AllowConnect":{"statementDescription":"Allow client devices to connect.","operations":["mqtt:connect"],"resources":["*"]},"AllowPublish":{"statementDescription":"Allow client devices to publish to all topics.","operations":["mqtt:publish"],"resources":["*"]},"AllowSubscribe":{"statementDescription":"Allow client devices to subscribe to all topics.","operations":["mqtt:subscribe"],"resources":["*"]}}}},"performance":{"maxConcurrentCloudRequests":"2"},"security":{"clientDeviceTrustDurationMinutes":"1440"}}'
+          RunWith: {}
+        aws.greengrass.clientdevices.IPDetector:
+          ComponentVersion: 2.1.7
+        aws.greengrass.clientdevices.mqtt.Bridge:
+          ComponentVersion: 2.2.6
+          ConfigurationUpdate:
+            Merge: !Sub '{"mqttTopicMapping":{"${IotCoreMappingName}":{"topic":"${MQTTTopicName}","source":"LocalMqtt","target":"IotCore"}}}'
+          RunWith: {}
+        aws.greengrass.clientdevices.mqtt.Moquette:
+          ComponentVersion: 2.3.3
+          ConfigurationUpdate:
+            Merge: '{"moquette":{"ssl_port":"8883"}}'
+      DeploymentPolicies:
+        FailureHandlingPolicy: ROLLBACK
+        ComponentUpdatePolicy:
+          TimeoutInSeconds: 60
+          Action: NOTIFY_COMPONENTS
+      IotJobConfiguration:
+        JobExecutionsRolloutConfig:
+          MaximumPerMinute: 1000
+      Tags:
+        Name:
+          Ref: DeploymentName
+        EnvironmentTag:
+          Ref: EnvironmentTag
+  ClientIoTPolicy:
+    Type: AWS::IoT::Policy
+    Properties:
+      PolicyName:
+        Ref: ClientDevicePolicyName
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: greengrass:*
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:iot:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - ":*"
+          - Effect: Allow
+            Action: "*"
+            Resource:
+              Fn::Join:
+                - ""
+                - - "arn:aws:iot:"
+                  - Ref: AWS::Region
+                  - ":"
+                  - Ref: AWS::AccountId
+                  - ":*"
+Outputs:
+  ThingGroup:
+    Value:
+      Ref: ThingGroup
+  GreengrassDeployment:
+    Value:
+      Ref: GreengrassDeployment
