@@ -11,7 +11,8 @@ resource "aws_eks_cluster" "k8s-distributed" {
   role_arn = aws_iam_role.k8s-distributed-cluster.arn
 
   vpc_config {
-    subnet_ids = [aws_subnet.parent-region-subnet-a.id, aws_subnet.parent-region-subnet-b.id]
+    subnet_ids             = [aws_subnet.parent-region-subnet-a.id, aws_subnet.parent-region-subnet-b.id]
+    endpoint_public_access = true
   }
 
   depends_on = [
@@ -23,7 +24,7 @@ resource "aws_eks_cluster" "k8s-distributed" {
 module "self_managed_node_group_wavelength" {
   source = "terraform-aws-modules/eks/aws//modules/self-managed-node-group"
 
-  name                = "wavelength-node-group"
+  name                = "wavelength"
   cluster_name        = var.cluster_name
   cluster_version     = var.kubernetes_version
   cluster_endpoint    = aws_eks_cluster.k8s-distributed.endpoint
@@ -46,6 +47,7 @@ module "self_managed_node_group_wavelength" {
     Environment = "dev"
     Terraform   = "true"
   }
+
 }
 
 output "cluster_url" {

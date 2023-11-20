@@ -150,84 +150,93 @@ resource "aws_security_group" "node_sg" {
   vpc_id      = aws_vpc.k8s-distributed.id
 
   ingress {
-    description = "TLS from VPC"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.k8s-distributed.cidr_block]
-    self        = true
+    description     = "TLS from VPC"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    self            = true
+    cidr_blocks     = [aws_vpc.k8s-distributed.cidr_block]
+    security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
   }
 
   ingress {
-    description = "Cluster API to node kubelets"
-    protocol    = "tcp"
-    from_port   = 10250
-    to_port     = 10250
-    self        = true
-    cidr_blocks = [aws_vpc.k8s-distributed.cidr_block]
+    description     = "Cluster API to node kubelets"
+    protocol        = "tcp"
+    from_port       = 10250
+    to_port         = 10250
+    self            = true
+    cidr_blocks     = [aws_vpc.k8s-distributed.cidr_block]
+    security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
   }
 
   ingress {
-    description = "Node to node CoreDNS"
-    protocol    = "tcp"
-    from_port   = 53
-    to_port     = 53
-    self        = true
-    cidr_blocks = [aws_vpc.k8s-distributed.cidr_block]
+    description     = "Node to node CoreDNS"
+    protocol        = "tcp"
+    from_port       = 53
+    to_port         = 53
+    self            = true
+    cidr_blocks     = [aws_vpc.k8s-distributed.cidr_block]
+    security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
   }
 
   ingress {
-    description = "Node to node CoreDNS UDP"
-    protocol    = "udp"
-    from_port   = 53
-    to_port     = 53
-    self        = true
-    cidr_blocks = [aws_vpc.k8s-distributed.cidr_block]
+    description     = "Node to node CoreDNS UDP"
+    protocol        = "udp"
+    from_port       = 53
+    to_port         = 53
+    self            = true
+    cidr_blocks     = [aws_vpc.k8s-distributed.cidr_block]
+    security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
   }
 
   ingress {
-    description = "Node to node ingress on ephemeral ports"
-    protocol    = "tcp"
-    from_port   = 1025
-    to_port     = 65535
-    self        = true
-    cidr_blocks = [aws_vpc.k8s-distributed.cidr_block]
+    description     = "Node to node ingress on ephemeral ports"
+    protocol        = "tcp"
+    from_port       = 1025
+    to_port         = 65535
+    self            = true
+    cidr_blocks     = [aws_vpc.k8s-distributed.cidr_block]
+    security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
   }
 
   ingress {
-    description = "Cluster API to node 4443/tcp webhook"
-    protocol    = "tcp"
-    from_port   = 4443
-    to_port     = 4443
-    self        = true
-    cidr_blocks = [aws_vpc.k8s-distributed.cidr_block]
+    description     = "Cluster API to node 4443/tcp webhook"
+    protocol        = "tcp"
+    from_port       = 4443
+    to_port         = 4443
+    self            = true
+    cidr_blocks     = [aws_vpc.k8s-distributed.cidr_block]
+    security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
   }
 
   ingress {
-    description = "Cluster API to node 6443/tcp webhook"
-    protocol    = "tcp"
-    from_port   = 6443
-    to_port     = 6443
-    self        = true
-    cidr_blocks = [aws_vpc.k8s-distributed.cidr_block]
+    description     = "Cluster API to node 6443/tcp webhook"
+    protocol        = "tcp"
+    from_port       = 6443
+    to_port         = 6443
+    self            = true
+    cidr_blocks     = [aws_vpc.k8s-distributed.cidr_block]
+    security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
   }
 
   ingress {
-    description = "Cluster API to node 8443/tcp webhook"
-    protocol    = "tcp"
-    from_port   = 8443
-    to_port     = 8443
-    self        = true
-    cidr_blocks = [aws_vpc.k8s-distributed.cidr_block]
+    description     = "Cluster API to node 8443/tcp webhook"
+    protocol        = "tcp"
+    from_port       = 8443
+    to_port         = 8443
+    self            = true
+    cidr_blocks     = [aws_vpc.k8s-distributed.cidr_block]
+    security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
   }
 
   ingress {
-    description = "Cluster API to node 9443/tcp webhook"
-    protocol    = "tcp"
-    from_port   = 9443
-    to_port     = 9443
-    self        = true
-    cidr_blocks = [aws_vpc.k8s-distributed.cidr_block]
+    description     = "Cluster API to node 9443/tcp webhook"
+    protocol        = "tcp"
+    from_port       = 9443
+    to_port         = 9443
+    self            = true
+    cidr_blocks     = [aws_vpc.k8s-distributed.cidr_block]
+    security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
   }
 
   egress {
