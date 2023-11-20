@@ -1,6 +1,3 @@
-# Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: MPL-2.0
-
 variable "cluster_name" {
   type    = string
   default = "edgecluster"
@@ -35,3 +32,4 @@ variable "parent_region" {
     washingtondc = "us-east-1"
   }
 }
+
