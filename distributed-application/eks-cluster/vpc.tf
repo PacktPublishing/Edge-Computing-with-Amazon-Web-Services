@@ -445,10 +445,12 @@ resource "aws_security_group" "node_sg" {
   vpc_id      = aws_vpc.k8s-distributed.id
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    self            = true
+    cidr_blocks     = ["10.0.0.0/16"]
+    security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
   }
   egress {
     from_port   = 0
