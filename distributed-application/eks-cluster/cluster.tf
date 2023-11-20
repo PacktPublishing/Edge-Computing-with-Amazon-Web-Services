@@ -4,9 +4,14 @@ data "aws_caller_identity" "current" {}
 data "aws_iam_session_context" "current" {
   arn = data.aws_caller_identity.current.arn
 }
+
+data "aws_eks_cluster_auth" "default" {
+  name = var.cluster_name
+}
 provider "kubernetes" {
   host                   = aws_eks_cluster.k8s-distributed.endpoint
   cluster_ca_certificate = base64decode(aws_eks_cluster.k8s-distributed.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.default.token
 }
 
 ## this creates the EKS cluster itself

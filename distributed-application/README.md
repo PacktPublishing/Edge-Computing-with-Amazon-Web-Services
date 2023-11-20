@@ -5,7 +5,7 @@ Change into the eks-cluster directory and create the EKS cluster infrastructure.
 ```
 cd eks-cluster
 terraform init
-terraform apply -var=edge_city=losangeles
+terraform apply -var=edge_city=losangeles -auto-approve
 cd ..
 ```
 
@@ -16,7 +16,7 @@ Change into the kubernetes-config directory to apply Kubernetes resources to the
 ```
 cd kubernetes-config
 terraform init
-terraform apply -var=edge_city=losangeles
+terraform apply -var=edge_city=losangeles -auto-approve
 cd ..
 ```
 
@@ -27,7 +27,7 @@ Change into the eks-oidc directory to apply Kubernetes resources to the new clus
 ```
 cd eks-oidc
 terraform init
-terraform apply -var=edge_city=losangeles
+terraform apply -var=edge_city=losangeles -auto-approve
 cd ..
 ```
 
@@ -37,7 +37,7 @@ First, delete the OIDC resources as shown below (if you deployed this element)
 
 ```
 cd eks-oidc
-terraform destroy -var=edge_city=losangeles
+terraform destroy -var=edge_city=losangeles -auto-approve
 cd ..
 ```
 
@@ -45,7 +45,7 @@ First, delete the Kubernetes resources as shown below. This will give Ingress an
 
 ```
 cd kubernetes-config
-terraform destroy -var=cluster_name=edgecluster
+terraform destroy -var=edge_city=losangeles -auto-approve
 cd ..
 ```
 
@@ -53,6 +53,6 @@ Then delete the EKS related resources:
 
 ```
 cd eks-cluster
-terraform destroy -var=cluster_name=edgecluster
+terraform destroy -var=edge_city=losangeles -auto-approve
 cd ..
 ```
