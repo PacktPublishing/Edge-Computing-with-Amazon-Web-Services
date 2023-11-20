@@ -31,7 +31,7 @@ resource "aws_subnet" "parent-region-subnet-a" {
   availability_zone       = "${lookup(var.parent_region, var.edge_city)}a"
   cidr_block              = "10.0.1.0/24"
   vpc_id                  = aws_vpc.k8s-distributed.id
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags = {
     Name                                        = "${var.cluster_name}-parent-region-subnet-a"
@@ -45,7 +45,7 @@ resource "aws_subnet" "parent-region-subnet-b" {
   availability_zone       = "${lookup(var.parent_region, var.edge_city)}b"
   cidr_block              = "10.0.2.0/24"
   vpc_id                  = aws_vpc.k8s-distributed.id
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags = {
     Name                                        = "${var.cluster_name}-parent-region-subnet-b"
@@ -60,7 +60,7 @@ resource "aws_subnet" "local-zone-subnet" {
   availability_zone_id    = lookup(var.local_zone, var.edge_city)
   cidr_block              = "10.0.3.0/24"
   vpc_id                  = aws_vpc.k8s-distributed.id
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags = {
     Name                                        = "${var.cluster_name}-local-zone-subnet"
@@ -71,9 +71,10 @@ resource "aws_subnet" "local-zone-subnet" {
 
 ## Create a subnet in the relevant AWS Wavelength Zone
 resource "aws_subnet" "wavelength-zone-subnet" {
-  availability_zone_id = lookup(var.wavelength_zone, var.edge_city)
-  cidr_block           = "10.0.4.0/24"
-  vpc_id               = aws_vpc.k8s-distributed.id
+  availability_zone_id    = lookup(var.wavelength_zone, var.edge_city)
+  cidr_block              = "10.0.4.0/24"
+  vpc_id                  = aws_vpc.k8s-distributed.id
+  map_public_ip_on_launch = false
 
   tags = {
     Name                                        = "${var.cluster_name}-wavelength-zone-subnet"

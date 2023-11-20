@@ -22,7 +22,7 @@ resource "aws_eks_cluster" "k8s-distributed" {
 
   vpc_config {
     subnet_ids             = [aws_subnet.parent-region-subnet-a.id, aws_subnet.parent-region-subnet-b.id]
-    endpoint_public_access = true
+    endpoint_public_access = false
   }
 
   depends_on = [
