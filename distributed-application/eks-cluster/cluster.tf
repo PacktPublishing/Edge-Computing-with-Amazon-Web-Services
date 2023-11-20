@@ -21,8 +21,9 @@ resource "aws_eks_cluster" "k8s-distributed" {
   role_arn = aws_iam_role.k8s-distributed-cluster.arn
 
   vpc_config {
-    subnet_ids             = [aws_subnet.parent-region-subnet-a.id, aws_subnet.parent-region-subnet-b.id]
-    endpoint_public_access = false
+    subnet_ids              = [aws_subnet.parent-region-subnet-a.id, aws_subnet.parent-region-subnet-b.id]
+    endpoint_public_access  = true
+    endpoint_private_access = true
   }
 
   depends_on = [
