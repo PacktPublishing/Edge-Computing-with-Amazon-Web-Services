@@ -43,7 +43,7 @@ module "self_managed_node_group_wavelength" {
   ]
 
   min_size     = 1
-  max_size     = 10
+  max_size     = 2
   desired_size = 1
 
   launch_template_name = "wavelength-self-mng"
