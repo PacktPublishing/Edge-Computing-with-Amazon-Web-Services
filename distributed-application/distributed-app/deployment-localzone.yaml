@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: eks-distributed-deployment
-  namespace: distributed-app
+  name: localzone-deployment
+  namespace: app-localzone
   labels:
-    app: distributed-app
+    app: app-localzone
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: distributed-app
+      app: app-localzone
   template:
     metadata:
       labels:
-        app: distributed-app
+        app: app-localzone
     spec:
       affinity:
         nodeAffinity:
@@ -25,6 +25,10 @@ spec:
                     values:
                       - amd64
                       - arm64
+                  - key: topology.kubernetes.io/zone
+                    operator: In
+                    values:
+                      - us-west-2-lax-1a
       containers:
         - name: nginx
           image: public.ecr.aws/nginx/nginx:1.23
