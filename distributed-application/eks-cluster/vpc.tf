@@ -434,10 +434,11 @@ resource "aws_security_group" "endpoint_sg" {
 
 resource "aws_security_group" "node_sg" {
   name        = "self-managed-node-sg"
-  description = "eks worker nodes"
+  description = "wide open"
   vpc_id      = aws_vpc.k8s-distributed.id
 
   ingress {
+    description     = "eks cluster to nodes"
     from_port       = 0
     to_port         = 0
     protocol        = "-1"
@@ -447,12 +448,14 @@ resource "aws_security_group" "node_sg" {
   }
 
   ingress {
+    description = "nodeport inbound"
     from_port   = 30000
     to_port     = 30000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
+    description = "outbound"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
