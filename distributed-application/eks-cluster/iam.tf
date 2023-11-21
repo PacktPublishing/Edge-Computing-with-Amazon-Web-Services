@@ -27,32 +27,17 @@ resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonEKSVPCResourceC
   role       = aws_iam_role.k8s-distributed-cluster.name
 }
 
-# resource "aws_iam_role" "k8s-distributed-node" {
-#   name = "${var.cluster_name}-node"
+resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonSSMManagedInstanceCore-parent" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = module.self_managed_node_group_parent_region.iam_role_arn
+}
 
-#   assume_role_policy = jsonencode({
-#     Statement = [{
-#       Action = "sts:AssumeRole"
-#       Effect = "Allow"
-#       Principal = {
-#         Service = "ec2.amazonaws.com"
-#       }
-#     }]
-#     Version = "2012-10-17"
-#   })
-# }
+resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonSSMManagedInstanceCore-localzone" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = module.self_managed_node_group_local_zone.iam_role_arn
+}
 
-# resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonEKSWorkerNodePolicy" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-#   role       = aws_iam_role.k8s-distributed-node.name
-# }
-
-# resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonEKS_CNI_Policy" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-#   role       = aws_iam_role.k8s-distributed-node.name
-# }
-
-# resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonEC2ContainerRegistryReadOnly" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-#   role       = aws_iam_role.k8s-distributed-node.name
+# resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonSSMManagedInstanceCore-wavelength" {
+#   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+#   role       = module.self_managed_node_group_wavelength.iam_role_arn
 # }
