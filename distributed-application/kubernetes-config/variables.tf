@@ -1,6 +1,6 @@
 variable "cluster_name" {
   type    = string
-  default = "edgecluster"
+  default = "distributedcluster"
 }
 
 variable "edge_city" {

@@ -341,6 +341,50 @@ resource "aws_vpc_endpoint" "ssm" {
 
 }
 
+resource "aws_vpc_endpoint" "ssmmessages" {
+  vpc_id            = aws_vpc.k8s-distributed.id
+  service_name      = "com.amazonaws.${lookup(var.parent_region, var.edge_city)}.ssmmessages"
+  vpc_endpoint_type = "Interface"
+
+  subnet_ids = [
+    aws_subnet.parent-region-subnet-a.id,
+    aws_subnet.parent-region-subnet-b.id
+  ]
+
+  security_group_ids = [
+    aws_security_group.endpoint_sg.id
+  ]
+
+  private_dns_enabled = true
+
+  tags = {
+    Name = "${var.cluster_name}-ssmmessages-endpoint"
+  }
+
+}
+
+resource "aws_vpc_endpoint" "ec2messages" {
+  vpc_id            = aws_vpc.k8s-distributed.id
+  service_name      = "com.amazonaws.${lookup(var.parent_region, var.edge_city)}.ec2messages"
+  vpc_endpoint_type = "Interface"
+
+  subnet_ids = [
+    aws_subnet.parent-region-subnet-a.id,
+    aws_subnet.parent-region-subnet-b.id
+  ]
+
+  security_group_ids = [
+    aws_security_group.endpoint_sg.id
+  ]
+
+  private_dns_enabled = true
+
+  tags = {
+    Name = "${var.cluster_name}-ec2messages-endpoint"
+  }
+
+}
+
 ## We need to manually create Security Groups because we're using self-managed
 ## node groups in EKS
 
