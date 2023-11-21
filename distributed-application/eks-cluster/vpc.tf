@@ -452,9 +452,10 @@ resource "aws_security_group" "node_sg" {
 
 ## this is needed so members of the self managed node groups can talk to the private EKS API
 resource "aws_security_group_rule" "allow_node_groups_to_eks_cluster" {
-  type              = "ingress"
-  to_port           = 0
-  protocol          = "-1"
-  from_port         = 0
-  security_group_id = aws_security_group.node_sg.id
+  type                     = "ingress"
+  to_port                  = 0
+  protocol                 = "-1"
+  from_port                = 0
+  security_group_id        = aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id
+  source_security_group_id = aws_security_group.node_sg.id
 }
