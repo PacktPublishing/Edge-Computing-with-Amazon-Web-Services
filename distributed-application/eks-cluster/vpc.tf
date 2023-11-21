@@ -395,12 +395,16 @@ resource "aws_security_group" "endpoint_sg" {
   description = "private endpoint traffic"
   vpc_id      = aws_vpc.k8s-distributed.id
   ingress {
-    description = "Allow all from VPC"
+    description = "Allow all from VPC and both SGs"
     self        = true
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["10.0.0.0/16"]
+    security_groups = [
+      aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id,
+      aws_security_group.node_sg.id
+    ]
   }
 
   egress {
@@ -444,4 +448,13 @@ resource "aws_security_group" "node_sg" {
   tags = {
     Name = "${var.cluster_name}-node-group-sg"
   }
+}
+
+## this is needed so members of the self managed node groups can talk to the private EKS API
+resource "aws_security_group_rule" "allow_node_groups_to_eks_cluster" {
+  type              = "ingress"
+  to_port           = 0
+  protocol          = "-1"
+  from_port         = 0
+  security_group_id = aws_security_group.node_sg.id
 }
