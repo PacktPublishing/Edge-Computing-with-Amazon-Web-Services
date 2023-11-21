@@ -34,11 +34,11 @@ resource "local_sensitive_file" "kubeconfig" {
   filename = "./kubeconfig-${var.cluster_name}"
 }
 
-resource "kubernetes_namespace" "wavelength" {
+/* resource "kubernetes_namespace" "wavelength" {
   metadata {
     name = "wavelength"
   }
-}
+} */
 
 resource "kubernetes_namespace" "localzone" {
   metadata {

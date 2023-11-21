@@ -9,11 +9,11 @@ resource "aws_ec2_availability_zone_group" "local_zone" {
   opt_in_status = "opted-in"
 }
 
-## Opt-in to the relevant AWS Wavelength Zone using its group name
-resource "aws_ec2_availability_zone_group" "wavelength_zone" {
-  group_name    = lookup(var.wavelength_group_name, var.edge_city)
-  opt_in_status = "opted-in"
-}
+# ## Opt-in to the relevant AWS Wavelength Zone using its group name
+# resource "aws_ec2_availability_zone_group" "wavelength_zone" {
+#   group_name    = lookup(var.wavelength_group_name, var.edge_city)
+#   opt_in_status = "opted-in"
+# }
 
 ## Create VPC in the parent region
 resource "aws_vpc" "k8s-distributed" {
@@ -70,18 +70,18 @@ resource "aws_subnet" "local-zone-subnet" {
 }
 
 ## Create a subnet in the relevant AWS Wavelength Zone
-resource "aws_subnet" "wavelength-zone-subnet" {
-  availability_zone_id    = lookup(var.wavelength_zone, var.edge_city)
-  cidr_block              = "10.0.4.0/24"
-  vpc_id                  = aws_vpc.k8s-distributed.id
-  map_public_ip_on_launch = false
+# resource "aws_subnet" "wavelength-zone-subnet" {
+#   availability_zone_id    = lookup(var.wavelength_zone, var.edge_city)
+#   cidr_block              = "10.0.4.0/24"
+#   vpc_id                  = aws_vpc.k8s-distributed.id
+#   map_public_ip_on_launch = false
 
-  tags = {
-    Name                                        = "${var.cluster_name}-wavelength-zone-subnet"
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                    = 1
-  }
-}
+#   tags = {
+#     Name                                        = "${var.cluster_name}-wavelength-zone-subnet"
+#     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+#     "kubernetes.io/role/elb"                    = 1
+#   }
+# }
 
 resource "aws_internet_gateway" "k8s-distributed-ig" {
   vpc_id = aws_vpc.k8s-distributed.id
@@ -91,13 +91,13 @@ resource "aws_internet_gateway" "k8s-distributed-ig" {
   }
 }
 
-resource "aws_ec2_carrier_gateway" "k8s-distributed-cg" {
-  vpc_id = aws_vpc.k8s-distributed.id
+# resource "aws_ec2_carrier_gateway" "k8s-distributed-cg" {
+#   vpc_id = aws_vpc.k8s-distributed.id
 
-  tags = {
-    Name = "${var.cluster_name}-carrier-gateway"
-  }
-}
+#   tags = {
+#     Name = "${var.cluster_name}-carrier-gateway"
+#   }
+# }
 
 resource "aws_route_table" "k8s-distributed-region-rt" {
   vpc_id = aws_vpc.k8s-distributed.id
@@ -114,18 +114,18 @@ resource "aws_route_table" "k8s-distributed-region-rt" {
 
 ## The subnet in the AWS Wavelength Zone needs a special route table
 ## so it knows to go out the Carrier Gateway for 0.0.0.0/0
-resource "aws_route_table" "k8s-distributed-wavelength-rt" {
-  vpc_id = aws_vpc.k8s-distributed.id
+# resource "aws_route_table" "k8s-distributed-wavelength-rt" {
+#   vpc_id = aws_vpc.k8s-distributed.id
 
-  route {
-    cidr_block         = "0.0.0.0/0"
-    carrier_gateway_id = aws_ec2_carrier_gateway.k8s-distributed-cg.id
-  }
+#   route {
+#     cidr_block         = "0.0.0.0/0"
+#     carrier_gateway_id = aws_ec2_carrier_gateway.k8s-distributed-cg.id
+#   }
 
-  tags = {
-    Name = "${var.cluster_name}-wavelength-rt"
-  }
-}
+#   tags = {
+#     Name = "${var.cluster_name}-wavelength-rt"
+#   }
+# }
 
 ## Parent Region and Local Zone subnets all use the Internet Gateway
 ## so they get associated to the primary route table
@@ -145,10 +145,10 @@ resource "aws_route_table_association" "k8s-distributed-region-rta-c" {
 }
 
 ## Only the Wavelength Zone subnet gets associated to the special route table
-resource "aws_route_table_association" "k8s-distributed-wavelength-rta" {
-  subnet_id      = aws_subnet.wavelength-zone-subnet.id
-  route_table_id = aws_route_table.k8s-distributed-wavelength-rt.id
-}
+# resource "aws_route_table_association" "k8s-distributed-wavelength-rta" {
+#   subnet_id      = aws_subnet.wavelength-zone-subnet.id
+#   route_table_id = aws_route_table.k8s-distributed-wavelength-rt.id
+# }
 
 ## Create Private VPC endpoints in the parent region for EKS
 ## see: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
@@ -318,6 +318,28 @@ resource "aws_vpc_endpoint" "sts" {
 
 }
 
+resource "aws_vpc_endpoint" "ssm" {
+  vpc_id            = aws_vpc.k8s-distributed.id
+  service_name      = "com.amazonaws.${lookup(var.parent_region, var.edge_city)}.ssm"
+  vpc_endpoint_type = "Interface"
+
+  subnet_ids = [
+    aws_subnet.parent-region-subnet-a.id,
+    aws_subnet.parent-region-subnet-b.id
+  ]
+
+  security_group_ids = [
+    aws_security_group.endpoint_sg.id
+  ]
+
+  private_dns_enabled = true
+
+  tags = {
+    Name = "${var.cluster_name}-ssm-endpoint"
+  }
+
+}
+
 ## We need to manually create Security Groups because we're using self-managed
 ## node groups in EKS
 
@@ -353,91 +375,6 @@ resource "aws_security_group" "endpoint_sg" {
 ## This SG is for the self-managed node groups. They need to be able to 
 ## talk to and from the EKS control plane elements, as well as allow app
 ## traffic in and out
-# resource "aws_security_group" "node_sg" {
-#   name        = "self-managed-node-sg"
-#   description = "allow traffic needed by EKS"
-#   vpc_id      = aws_vpc.k8s-distributed.id
-
-#   ingress {
-#     description = "TLS from VPC"
-#     from_port   = 443
-#     to_port     = 443
-#     protocol    = "tcp"
-#     cidr_blocks = [aws_vpc.k8s-distributed.cidr_block]
-#   }
-
-#   ingress {
-#     description     = "Cluster API to node kubelets"
-#     protocol        = "tcp"
-#     from_port       = 10250
-#     to_port         = 10250
-#     self            = true
-#     security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
-#   }
-
-#   ingress {
-#     description = "Node to node CoreDNS"
-#     protocol    = "tcp"
-#     from_port   = 53
-#     to_port     = 53
-#     self        = true
-#   }
-
-#   ingress {
-#     description = "Node to node CoreDNS UDP"
-#     protocol    = "udp"
-#     from_port   = 53
-#     to_port     = 53
-#     self        = true
-#   }
-
-#   ingress {
-#     description = "Node to node ingress on ephemeral ports"
-#     protocol    = "tcp"
-#     from_port   = 1025
-#     to_port     = 65535
-#     self        = true
-#   }
-
-#   ingress {
-#     description     = "Cluster API to node 4443/tcp webhook"
-#     protocol        = "tcp"
-#     from_port       = 4443
-#     to_port         = 4443
-#     security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
-#   }
-
-#   ingress {
-#     description     = "Cluster API to node 6443/tcp webhook"
-#     protocol        = "tcp"
-#     from_port       = 6443
-#     to_port         = 6443
-#     security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
-#   }
-
-#   ingress {
-#     description     = "Cluster API to node 8443/tcp webhook"
-#     protocol        = "tcp"
-#     from_port       = 8443
-#     to_port         = 8443
-#     security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
-#   }
-
-#   ingress {
-#     description     = "Cluster API to node 9443/tcp webhook"
-#     protocol        = "tcp"
-#     from_port       = 9443
-#     to_port         = 9443
-#     security_groups = [aws_eks_cluster.k8s-distributed.vpc_config[0].cluster_security_group_id]
-#   }
-
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-# }
 
 resource "aws_security_group" "node_sg" {
   name        = "self-managed-node-sg"

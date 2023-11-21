@@ -66,34 +66,34 @@ module "self_managed_node_group_parent_region" {
 }
 
 ## this uses a module to deploy a self-managed node group to the AWS Wavelength Zone
-module "self_managed_node_group_wavelength" {
-  source = "terraform-aws-modules/eks/aws//modules/self-managed-node-group"
+# module "self_managed_node_group_wavelength" {
+#   source = "terraform-aws-modules/eks/aws//modules/self-managed-node-group"
 
-  name                = "wavelength"
-  cluster_name        = var.cluster_name
-  cluster_version     = var.kubernetes_version
-  cluster_endpoint    = aws_eks_cluster.k8s-distributed.endpoint
-  cluster_auth_base64 = base64encode(aws_eks_cluster.k8s-distributed.certificate_authority[0].data)
+#   name                = "wavelength"
+#   cluster_name        = var.cluster_name
+#   cluster_version     = var.kubernetes_version
+#   cluster_endpoint    = aws_eks_cluster.k8s-distributed.endpoint
+#   cluster_auth_base64 = base64encode(aws_eks_cluster.k8s-distributed.certificate_authority[0].data)
 
-  subnet_ids = [aws_subnet.wavelength-zone-subnet.id]
+#   subnet_ids = [aws_subnet.wavelength-zone-subnet.id]
 
-  vpc_security_group_ids = [
-    aws_security_group.node_sg.id
-  ]
+#   vpc_security_group_ids = [
+#     aws_security_group.node_sg.id
+#   ]
 
-  min_size     = 1
-  max_size     = 2
-  desired_size = 1
+#   min_size     = 1
+#   max_size     = 2
+#   desired_size = 1
 
-  launch_template_name = "wavelength-self-mng"
-  instance_type        = "t3.medium"
+#   launch_template_name = "wavelength-self-mng"
+#   instance_type        = "t3.medium"
 
-  tags = {
-    Environment = "dev"
-    Terraform   = "true"
-  }
+#   tags = {
+#     Environment = "dev"
+#     Terraform   = "true"
+#   }
 
-}
+# }
 
 ## this uses a module to deploy a self-managed node group to the AWS Local Zone
 module "self_managed_node_group_local_zone" {
@@ -139,14 +139,14 @@ locals {
   ]
 
   role_map_obj = [
-    {
-      rolearn  = module.self_managed_node_group_wavelength.iam_role_arn
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups = [
-        "system:bootstrappers",
-        "system:nodes",
-      ]
-    },
+    # {
+    #   rolearn  = module.self_managed_node_group_wavelength.iam_role_arn
+    #   username = "system:node:{{EC2PrivateDNSName}}"
+    #   groups = [
+    #     "system:bootstrappers",
+    #     "system:nodes",
+    #   ]
+    # },
     {
       rolearn  = module.self_managed_node_group_parent_region.iam_role_arn
       username = "system:node:{{EC2PrivateDNSName}}"
