@@ -29,12 +29,12 @@ resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonEKSVPCResourceC
 
 resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonSSMManagedInstanceCore-parent" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-  role       = module.self_managed_node_group_parent_region.iam_role_arn
+  role       = module.self_managed_node_group_parent_region.iam_role_name
 }
 
 resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonSSMManagedInstanceCore-localzone" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-  role       = module.self_managed_node_group_local_zone.iam_role_arn
+  role       = module.self_managed_node_group_local_zone.iam_role_name
 }
 
 # resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonSSMManagedInstanceCore-wavelength" {
