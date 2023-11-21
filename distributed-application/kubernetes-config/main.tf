@@ -40,13 +40,13 @@ resource "local_sensitive_file" "kubeconfig" {
   }
 } */
 
-resource "kubernetes_namespace" "localzone" {
+resource "kubernetes_namespace" "aws-localzone" {
   metadata {
     name = "localzone"
   }
 }
 
-resource "kubernetes_namespace" "region" {
+resource "kubernetes_namespace" "aws-region" {
   metadata {
     name = "region"
   }

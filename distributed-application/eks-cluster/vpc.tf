@@ -28,11 +28,12 @@ resource "aws_vpc" "k8s-distributed" {
 
 ## Create the first subnet in the parent region for EKS to use (AZ b)
 resource "aws_subnet" "parent-region-subnet-a" {
-  availability_zone       = "${lookup(var.parent_region, var.edge_city)}a"
-  cidr_block              = "10.0.1.0/24"
-  vpc_id                  = aws_vpc.k8s-distributed.id
-  map_public_ip_on_launch = false
-
+  availability_zone                           = "${lookup(var.parent_region, var.edge_city)}a"
+  cidr_block                                  = "10.0.1.0/24"
+  vpc_id                                      = aws_vpc.k8s-distributed.id
+  map_public_ip_on_launch                     = true
+  enable_resource_name_dns_a_record_on_launch = true
+  private_dns_hostname_type_on_launch         = "ip-name"
   tags = {
     Name                                        = "${var.cluster_name}-parent-region-subnet-a"
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
@@ -42,10 +43,12 @@ resource "aws_subnet" "parent-region-subnet-a" {
 
 ## Create the second subnet in the parent region for EKS to use (AZ a)
 resource "aws_subnet" "parent-region-subnet-b" {
-  availability_zone       = "${lookup(var.parent_region, var.edge_city)}b"
-  cidr_block              = "10.0.2.0/24"
-  vpc_id                  = aws_vpc.k8s-distributed.id
-  map_public_ip_on_launch = false
+  availability_zone                           = "${lookup(var.parent_region, var.edge_city)}b"
+  cidr_block                                  = "10.0.2.0/24"
+  vpc_id                                      = aws_vpc.k8s-distributed.id
+  map_public_ip_on_launch                     = true
+  enable_resource_name_dns_a_record_on_launch = true
+  private_dns_hostname_type_on_launch         = "ip-name"
 
   tags = {
     Name                                        = "${var.cluster_name}-parent-region-subnet-b"
@@ -57,10 +60,12 @@ resource "aws_subnet" "parent-region-subnet-b" {
 ## Create a subnet in the relevant AWS Local Zone
 ## Note: AZ c in the parent region is used if no Local Zone exists there
 resource "aws_subnet" "local-zone-subnet" {
-  availability_zone_id    = lookup(var.local_zone, var.edge_city)
-  cidr_block              = "10.0.3.0/24"
-  vpc_id                  = aws_vpc.k8s-distributed.id
-  map_public_ip_on_launch = false
+  availability_zone_id                        = lookup(var.local_zone, var.edge_city)
+  cidr_block                                  = "10.0.3.0/24"
+  vpc_id                                      = aws_vpc.k8s-distributed.id
+  map_public_ip_on_launch                     = true
+  enable_resource_name_dns_a_record_on_launch = true
+  private_dns_hostname_type_on_launch         = "ip-name"
 
   tags = {
     Name                                        = "${var.cluster_name}-local-zone-subnet"
@@ -75,6 +80,8 @@ resource "aws_subnet" "local-zone-subnet" {
 #   cidr_block              = "10.0.4.0/24"
 #   vpc_id                  = aws_vpc.k8s-distributed.id
 #   map_public_ip_on_launch = false
+# enable_resource_name_dns_a_record_on_launch = true
+# private_dns_hostname_type_on_launch = "ip-name"
 
 #   tags = {
 #     Name                                        = "${var.cluster_name}-wavelength-zone-subnet"

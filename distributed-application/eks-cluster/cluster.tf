@@ -1,6 +1,8 @@
 
 data "aws_caller_identity" "current" {}
 
+data "aws_partition" "current" {}
+
 data "aws_iam_session_context" "current" {
   arn = data.aws_caller_identity.current.arn
 }
@@ -196,6 +198,34 @@ resource "kubernetes_config_map_v1_data" "aws_auth" {
   depends_on = [
     kubernetes_config_map.aws_auth,
   ]
+}
+
+## This section creates a pull through cache for public.ecr.aws
+resource "aws_ecr_pull_through_cache_rule" "ecr_public" {
+  ecr_repository_prefix = "ecr-public"
+  upstream_registry_url = "public.ecr.aws"
+}
+
+resource "aws_ecr_registry_policy" "allow_node_groups_to_ecr" {
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "AllowECRPullThroughCache",
+        Effect = "Allow",
+        Principal = {
+          "AWS" : [
+            "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+          ]
+        },
+        Action = [
+          "ecr:CreateRepository",
+          "ecr:BatchImportUpstreamImage"
+        ],
+        Resource = "arn:aws:ecr:${lookup(var.parent_region, var.edge_city)}:${data.aws_caller_identity.current.account_id}:repository/*"
+      }
+    ]
+  })
 }
 output "cluster_url" {
   value = aws_eks_cluster.k8s-distributed.endpoint
