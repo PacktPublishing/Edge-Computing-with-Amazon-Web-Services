@@ -221,8 +221,9 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_endpoint_type = "Gateway"
 
   route_table_ids = [
-    aws_route_table.k8s-distributed-region-rt.id,
-    aws_route_table.k8s-distributed-wavelength-rt.id
+    aws_route_table.k8s-distributed-region-rt.id
+    #,
+    ##aws_route_table.k8s-distributed-wavelength-rt.id
   ]
 
   tags = {
