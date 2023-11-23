@@ -71,7 +71,7 @@ resource "kubernetes_namespace" "app-wavelength" {
     name = "app-wavelength"
 
     labels = {
-      "apps.kubernetes.io/app" = "app-wavelength"
+      app = "app-wavelength"
     }
   }
 }
@@ -81,7 +81,7 @@ resource "kubernetes_namespace" "app-localzone" {
     name = "app-localzone"
 
     labels = {
-      "apps.kubernetes.io/app" = "app-localzone"
+      app = "app-localzone"
     }
   }
 }
@@ -91,7 +91,7 @@ resource "kubernetes_namespace" "app-region" {
     name = "app-region"
 
     labels = {
-      "apps.kubernetes.io/app" = "app-region"
+      app = "app-region"
     }
   }
 
@@ -105,7 +105,7 @@ resource "kubernetes_node_taint" "localzone" {
     name = data.kubernetes_nodes.localzone.nodes[count.index].metadata.0.name
   }
   taint {
-    key    = "apps.kubernetes.io/app"
+    key    = "app"
     value  = "app-localzone"
     effect = "NoSchedule"
   }
@@ -117,7 +117,7 @@ resource "kubernetes_node_taint" "region" {
     name = data.kubernetes_nodes.region.nodes[count.index].metadata.0.name
   }
   taint {
-    key    = "apps.kubernetes.io/app"
+    key    = "app"
     value  = "app-region"
     effect = "NoSchedule"
   }
@@ -129,26 +129,26 @@ resource "kubernetes_deployment" "app-localzone-deployment" {
     name      = "localzone-deployment"
     namespace = "distributed-app-localzone"
     labels = {
-      "apps.kubernetes.io/app" = "app-localzone"
+      app = "app-localzone"
     }
   }
   spec {
     replicas = 1
     selector {
       match_labels = {
-        "apps.kubernetes.io/app" = "app-localzone"
+        app = "app-localzone"
       }
     }
     template {
       metadata {
         labels = {
-          "apps.kubernetes.io/app" = "app-localzone"
+          app = "app-localzone"
         }
       }
 
       spec {
         toleration {
-          key      = "apps.kubernetes.io/app"
+          key      = "app"
           value    = "app-localzone"
           operator = "Equal"
           effect   = "NoSchedule"
@@ -170,35 +170,56 @@ resource "kubernetes_deployment" "app-localzone-deployment" {
   }
   depends_on = [
     kubernetes_node_taint.region,
-    kubernetes_node_taint.localzone
+    kubernetes_node_taint.localzone,
+    #kubernetes_node_taint.wavelength
   ]
 }
 
+resource "kubernetes_service" "app-localzone-service" {
+  metadata {
+    name      = "localzone-service"
+    namespace = "distributed-app-localzone"
+  }
+  spec {
+    selector = {
+      app = "app-localzone"
+    }
+    port {
+      port        = 80
+      target_port = 80
+      node_port   = 30001
+      name        = "localzone-port"
+      protocol    = "TCP"
+    }
+
+    type = "NodePort"
+  }
+}
 resource "kubernetes_deployment" "app-region-deployment" {
   metadata {
     name      = "region-deployment"
     namespace = "distributed-app-region"
     labels = {
-      "apps.kubernetes.io/app" = "app-region"
+      app = "app-region"
     }
   }
   spec {
     replicas = 1
     selector {
       match_labels = {
-        "apps.kubernetes.io/app" = "app-region"
+        app = "app-region"
       }
     }
     template {
       metadata {
         labels = {
-          "apps.kubernetes.io/app" = "app-region"
+          app = "app-region"
         }
       }
 
       spec {
         toleration {
-          key      = "apps.kubernetes.io/app"
+          key      = "app"
           value    = "app-region"
           operator = "Equal"
           effect   = "NoSchedule"
@@ -220,18 +241,112 @@ resource "kubernetes_deployment" "app-region-deployment" {
   }
   depends_on = [
     kubernetes_node_taint.region,
-    kubernetes_node_taint.localzone
+    kubernetes_node_taint.localzone,
+    #kubernetes_node_taint.wavelength
   ]
 }
 
-output "region_nodes" {
-  value = [for node in data.kubernetes_nodes.region.nodes : node.spec.0.provider_id]
+resource "kubernetes_service" "app-region-service" {
+  metadata {
+    name      = "region-service"
+    namespace = "distributed-app-region"
+  }
+  spec {
+    selector = {
+      "app" = "app-region"
+    }
+    port {
+      port        = 80
+      target_port = 80
+      node_port   = 30000
+      name        = "region-port"
+      protocol    = "TCP"
+    }
+
+    type = "NodePort"
+  }
 }
 
-output "localzone_nodes" {
-  value = [for node in data.kubernetes_nodes.localzone.nodes : node.spec.0.provider_id]
+# resource "kubernetes_deployment" "app-wavelength-deployment" {
+#   metadata {
+#     name      = "wavelength-deployment"
+#     namespace = "distributed-app-wavelength"
+#     labels = {
+#       app = "app-wavelength"
+#     }
+#   }
+#   spec {
+#     replicas = 1
+#     selector {
+#       match_labels = {
+#         app = "app-wavelength"
+#       }
+#     }
+#     template {
+#       metadata {
+#         labels = {
+#           app = "app-wavelength"
+#         }
+#       }
+
+#       spec {
+#         toleration {
+#           key      = "app"
+#           value    = "app-wavelength"
+#           operator = "Equal"
+#           effect   = "NoSchedule"
+#         }
+#         container {
+#           name  = "nginx"
+#           image = "public.ecr.aws/nginx/nginx:1.23"
+#           port {
+#             name           = "http"
+#             container_port = 80
+#           }
+#           image_pull_policy = "IfNotPresent"
+#         }
+#         node_selector = {
+#           "kubernetes.io/os" = "linux"
+#         }
+#       }
+#     }
+#   }
+#   depends_on = [
+#     kubernetes_node_taint.wavelength,
+#     kubernetes_node_taint.localzone
+#     kubernetes_node_taint.region
+#   ]
+# }
+
+# resource "kubernetes_service" "app-wavelength-service" {
+#   metadata {
+#     name      = "wavelength-service"
+#     namespace = "distributed-app-wavelength"
+#   }
+#   spec {
+#     selector = {
+#       "app" = "app-wavelength"
+#     }
+#     port {
+#       port        = 80
+#       target_port = 80
+#       node_port   = 30002
+#       name        = "wavelength-port"
+#       protocol    = "TCP"
+#     }
+
+#     type = "NodePort"
+#   }
+# }
+
+output "region_address" {
+  value = "http://${data.kubernetes_nodes.region.nodes[0].status[0].addresses[1].address}:30000"
 }
 
-output "wavelength_nodes" {
-  value = [for node in data.kubernetes_nodes.wavelength.nodes : node.spec.0.provider_id]
+output "localzone_address" {
+  value = "http://${data.kubernetes_nodes.localzone.nodes[0].status[0].addresses[1].address}:30001"
 }
+
+# output "wavelength_address" {
+#   value = "http://${data.kubernetes_nodes.wavelength.nodes[0].status[0].addresses[1].address}:30002"
+# }
