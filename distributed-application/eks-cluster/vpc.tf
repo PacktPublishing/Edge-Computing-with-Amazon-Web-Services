@@ -60,7 +60,7 @@ resource "aws_subnet" "parent-region-subnet-b" {
 ## Create a subnet in the relevant AWS Local Zone
 ## Note: AZ c in the parent region is used if no Local Zone exists there
 resource "aws_subnet" "local-zone-subnet" {
-  availability_zone_id                        = lookup(var.local_zone, var.edge_city)
+  availability_zone_id                        = lookup(var.local_zone_id, var.edge_city)
   cidr_block                                  = "10.0.3.0/24"
   vpc_id                                      = aws_vpc.k8s-distributed.id
   map_public_ip_on_launch                     = true
@@ -76,7 +76,7 @@ resource "aws_subnet" "local-zone-subnet" {
 
 ## Create a subnet in the relevant AWS Wavelength Zone
 # resource "aws_subnet" "wavelength-zone-subnet" {
-#   availability_zone_id    = lookup(var.wavelength_zone, var.edge_city)
+#   availability_zone_id    = lookup(var.wavelength_zone_id, var.edge_city)
 #   cidr_block              = "10.0.4.0/24"
 #   vpc_id                  = aws_vpc.k8s-distributed.id
 #   map_public_ip_on_launch = false
@@ -450,10 +450,19 @@ resource "aws_security_group" "node_sg" {
   ingress {
     description = "nodeport inbound"
     from_port   = 30000
-    to_port     = 30000
+    to_port     = 30002
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    description = "ICMP inbound"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     description = "outbound"
     from_port   = 0

@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: localzone-deployment
-  namespace: distributed-app-localzone
+  name: region-deployment
+  namespace: distributed-app-region
   labels:
-    app: app-localzone
+    app: app-region
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: app-localzone
+      app: app-region
   template:
     metadata:
       labels:
-        app: app-localzone
+        app: app-region
     spec:
       affinity:
         nodeAffinity:
@@ -28,7 +28,7 @@ spec:
                   - key: topology.kubernetes.io/zone
                     operator: In
                     values:
-                      - us-west-2-lax-1a
+                      - us-west-2b
       containers:
         - name: nginx
           image: public.ecr.aws/nginx/nginx:1.23

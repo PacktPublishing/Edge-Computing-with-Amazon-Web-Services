@@ -61,7 +61,7 @@ module "self_managed_node_group_parent_region" {
   instance_type        = "t3.medium"
 
   tags = {
-    Environment = "dev"
+    Environment = "region"
     Terraform   = "true"
   }
 
@@ -91,7 +91,7 @@ module "self_managed_node_group_parent_region" {
 #   instance_type        = "t3.medium"
 
 #   tags = {
-#     Environment = "dev"
+#     Environment = "wavelength"
 #     Terraform   = "true"
 #   }
 
@@ -121,7 +121,7 @@ module "self_managed_node_group_local_zone" {
   instance_type        = "t3.medium"
 
   tags = {
-    Environment = "dev"
+    Environment = "local_zone"
     Terraform   = "true"
   }
 
