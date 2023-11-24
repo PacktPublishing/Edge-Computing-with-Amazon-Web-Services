@@ -5,9 +5,11 @@ provider "aws" {
 
 ## Opt-in to the relevant AWS Local Zone using its group name
 resource "aws_ec2_availability_zone_group" "local_zone" {
+  count         = lookup(var.true_local_zone, var.edge_city) ? 1 : 0
   group_name    = lookup(var.local_zone_group_name, var.edge_city)
   opt_in_status = "opted-in"
 }
+
 
 # ## Opt-in to the relevant AWS Wavelength Zone using its group name
 resource "aws_ec2_availability_zone_group" "wavelength_zone" {

@@ -187,3 +187,28 @@ variable "local_zone_id" {
     washingtondc = "use1-az3"
   }
 }
+
+variable "true_local_zone" {
+  type = map(any)
+  default = {
+    atlanta      = true
+    boston       = true
+    chicago      = true
+    dallas       = true
+    denver       = true
+    houston      = true
+    lasvegas     = true
+    losangeles   = true
+    miami        = true
+    minneapolis  = true
+    newyorkcity  = true
+    phoenix      = true
+    seattle      = true
+    london       = false
+    osaka        = false
+    sanfrancisco = false
+    seoul        = false
+    tokyo        = false
+    washingtondc = false
+  }
+}
