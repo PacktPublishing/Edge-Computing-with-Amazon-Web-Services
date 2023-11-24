@@ -28,18 +28,21 @@ data "kubernetes_nodes" "wavelength" {
       "topology.kubernetes.io/zone" = lookup(var.wavelength_zone, var.edge_city)
     }
   }
+
 }
 
 locals {
   instance_id_list = split("/", data.kubernetes_nodes.wavelength.nodes[0].spec[0].provider_id)
 }
 
-## Terraform doesn't really understand wavelength, so lets manually
-## create an EIP on the CGW and attach it to our node
+## Terraform doesn't really understand wavelength, so lets manually create an EIP on the CGW 
+## and attach it to our node. Note this is a good example of when you need to know the network
+## border group id
 resource "aws_eip" "wavelength_eip" {
   domain                    = "vpc"
   instance                  = element(local.instance_id_list, length(local.instance_id_list) - 1)
   associate_with_private_ip = data.kubernetes_nodes.wavelength.nodes[0].status[0].addresses[0].address
+  network_border_group      = lookup(var.wavelength_zone, var.edge_city)
 }
 
 ## this section creates a list of k8s nodes (ec2 instances) in the region
@@ -404,5 +407,5 @@ output "localzone_address" {
 }
 
 output "wavelength_address" {
-  value = "http://${aws_eip.wavelength_eip.public_ip}:30002"
+  value = "http://${aws_eip.wavelength_eip.carrier_ip}:30002"
 }
