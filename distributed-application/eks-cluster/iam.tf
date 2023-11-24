@@ -37,7 +37,7 @@ resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonSSMManagedInsta
   role       = module.self_managed_node_group_local_zone.iam_role_name
 }
 
-# resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonSSMManagedInstanceCore-wavelength" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-#   role       = module.self_managed_node_group_wavelength.iam_role_arn
-# }
+resource "aws_iam_role_policy_attachment" "k8s-distributed-AmazonSSMManagedInstanceCore-wavelength" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = module.self_managed_node_group_wavelength.iam_role_arn
+}

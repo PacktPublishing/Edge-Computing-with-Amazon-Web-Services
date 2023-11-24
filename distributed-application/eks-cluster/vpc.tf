@@ -10,10 +10,10 @@ resource "aws_ec2_availability_zone_group" "local_zone" {
 }
 
 # ## Opt-in to the relevant AWS Wavelength Zone using its group name
-# resource "aws_ec2_availability_zone_group" "wavelength_zone" {
-#   group_name    = lookup(var.wavelength_group_name, var.edge_city)
-#   opt_in_status = "opted-in"
-# }
+resource "aws_ec2_availability_zone_group" "wavelength_zone" {
+  group_name    = lookup(var.wavelength_group_name, var.edge_city)
+  opt_in_status = "opted-in"
+}
 
 ## Create VPC in the parent region
 resource "aws_vpc" "k8s-distributed" {
@@ -75,20 +75,20 @@ resource "aws_subnet" "local-zone-subnet" {
 }
 
 ## Create a subnet in the relevant AWS Wavelength Zone
-# resource "aws_subnet" "wavelength-zone-subnet" {
-#   availability_zone_id    = lookup(var.wavelength_zone_id, var.edge_city)
-#   cidr_block              = "10.0.4.0/24"
-#   vpc_id                  = aws_vpc.k8s-distributed.id
-#   map_public_ip_on_launch = false
-# enable_resource_name_dns_a_record_on_launch = true
-# private_dns_hostname_type_on_launch = "ip-name"
+resource "aws_subnet" "wavelength-zone-subnet" {
+  availability_zone_id                        = lookup(var.wavelength_zone_id, var.edge_city)
+  cidr_block                                  = "10.0.4.0/24"
+  vpc_id                                      = aws_vpc.k8s-distributed.id
+  map_public_ip_on_launch                     = false
+  enable_resource_name_dns_a_record_on_launch = true
+  private_dns_hostname_type_on_launch         = "ip-name"
 
-#   tags = {
-#     Name                                        = "${var.cluster_name}-wavelength-zone-subnet"
-#     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-#     "kubernetes.io/role/elb"                    = 1
-#   }
-# }
+  tags = {
+    Name                                        = "${var.cluster_name}-wavelength-zone-subnet"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                    = 1
+  }
+}
 
 resource "aws_internet_gateway" "k8s-distributed-ig" {
   vpc_id = aws_vpc.k8s-distributed.id
@@ -98,13 +98,13 @@ resource "aws_internet_gateway" "k8s-distributed-ig" {
   }
 }
 
-# resource "aws_ec2_carrier_gateway" "k8s-distributed-cg" {
-#   vpc_id = aws_vpc.k8s-distributed.id
+resource "aws_ec2_carrier_gateway" "k8s-distributed-cg" {
+  vpc_id = aws_vpc.k8s-distributed.id
 
-#   tags = {
-#     Name = "${var.cluster_name}-carrier-gateway"
-#   }
-# }
+  tags = {
+    Name = "${var.cluster_name}-carrier-gateway"
+  }
+}
 
 resource "aws_route_table" "k8s-distributed-region-rt" {
   vpc_id = aws_vpc.k8s-distributed.id
@@ -121,18 +121,18 @@ resource "aws_route_table" "k8s-distributed-region-rt" {
 
 ## The subnet in the AWS Wavelength Zone needs a special route table
 ## so it knows to go out the Carrier Gateway for 0.0.0.0/0
-# resource "aws_route_table" "k8s-distributed-wavelength-rt" {
-#   vpc_id = aws_vpc.k8s-distributed.id
+resource "aws_route_table" "k8s-distributed-wavelength-rt" {
+  vpc_id = aws_vpc.k8s-distributed.id
 
-#   route {
-#     cidr_block         = "0.0.0.0/0"
-#     carrier_gateway_id = aws_ec2_carrier_gateway.k8s-distributed-cg.id
-#   }
+  route {
+    cidr_block         = "0.0.0.0/0"
+    carrier_gateway_id = aws_ec2_carrier_gateway.k8s-distributed-cg.id
+  }
 
-#   tags = {
-#     Name = "${var.cluster_name}-wavelength-rt"
-#   }
-# }
+  tags = {
+    Name = "${var.cluster_name}-wavelength-rt"
+  }
+}
 
 ## Parent Region and Local Zone subnets all use the Internet Gateway
 ## so they get associated to the primary route table
@@ -152,10 +152,10 @@ resource "aws_route_table_association" "k8s-distributed-region-rta-c" {
 }
 
 ## Only the Wavelength Zone subnet gets associated to the special route table
-# resource "aws_route_table_association" "k8s-distributed-wavelength-rta" {
-#   subnet_id      = aws_subnet.wavelength-zone-subnet.id
-#   route_table_id = aws_route_table.k8s-distributed-wavelength-rt.id
-# }
+resource "aws_route_table_association" "k8s-distributed-wavelength-rta" {
+  subnet_id      = aws_subnet.wavelength-zone-subnet.id
+  route_table_id = aws_route_table.k8s-distributed-wavelength-rt.id
+}
 
 ## Create Private VPC endpoints in the parent region for EKS
 ## see: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
@@ -228,9 +228,8 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_endpoint_type = "Gateway"
 
   route_table_ids = [
-    aws_route_table.k8s-distributed-region-rt.id
-    #,
-    ##aws_route_table.k8s-distributed-wavelength-rt.id
+    aws_route_table.k8s-distributed-region-rt.id,
+    aws_route_table.k8s-distributed-wavelength-rt.id
   ]
 
   tags = {

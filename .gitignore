@@ -1,2 +1,4 @@
 *.pem
 *claim-certs*
+distributed-application/nginx-php*
+

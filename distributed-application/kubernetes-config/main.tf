@@ -153,14 +153,23 @@ resource "kubernetes_deployment" "app-localzone-deployment" {
           operator = "Equal"
           effect   = "NoSchedule"
         }
+        host_network = true
         container {
           name  = "nginx"
-          image = "public.ecr.aws/nginx/nginx:1.23"
+          image = "public.ecr.aws/e2t7i0t3/sample-edge-app:4"
           port {
             name           = "http"
             container_port = 80
           }
           image_pull_policy = "IfNotPresent"
+          env {
+            name  = "AWS_ZONE"
+            value = lookup(var.local_zone, var.edge_city)
+          }
+          env {
+            name  = "EDGE_CITY"
+            value = var.edge_city
+          }
         }
         node_selector = {
           "kubernetes.io/os" = "linux"
@@ -171,7 +180,7 @@ resource "kubernetes_deployment" "app-localzone-deployment" {
   depends_on = [
     kubernetes_node_taint.region,
     kubernetes_node_taint.localzone,
-    #kubernetes_node_taint.wavelength
+    kubernetes_node_taint.wavelength
   ]
 }
 
@@ -184,6 +193,7 @@ resource "kubernetes_service" "app-localzone-service" {
     selector = {
       app = "app-localzone"
     }
+    external_traffic_policy = "Local"
     port {
       port        = 80
       target_port = 80
@@ -224,14 +234,23 @@ resource "kubernetes_deployment" "app-region-deployment" {
           operator = "Equal"
           effect   = "NoSchedule"
         }
+        host_network = true
         container {
           name  = "nginx"
-          image = "public.ecr.aws/nginx/nginx:1.23"
+          image = "public.ecr.aws/e2t7i0t3/sample-edge-app:4"
           port {
             name           = "http"
             container_port = 80
           }
           image_pull_policy = "IfNotPresent"
+          env {
+            name  = "AWS_ZONE"
+            value = lookup(var.parent_region, var.edge_city)
+          }
+          env {
+            name  = "EDGE_CITY"
+            value = var.edge_city
+          }
         }
         node_selector = {
           "kubernetes.io/os" = "linux"
@@ -242,7 +261,7 @@ resource "kubernetes_deployment" "app-region-deployment" {
   depends_on = [
     kubernetes_node_taint.region,
     kubernetes_node_taint.localzone,
-    #kubernetes_node_taint.wavelength
+    kubernetes_node_taint.wavelength
   ]
 }
 
@@ -255,6 +274,7 @@ resource "kubernetes_service" "app-region-service" {
     selector = {
       "app" = "app-region"
     }
+    external_traffic_policy = "Local"
     port {
       port        = 80
       target_port = 80
@@ -267,77 +287,87 @@ resource "kubernetes_service" "app-region-service" {
   }
 }
 
-# resource "kubernetes_deployment" "app-wavelength-deployment" {
-#   metadata {
-#     name      = "wavelength-deployment"
-#     namespace = "distributed-app-wavelength"
-#     labels = {
-#       app = "app-wavelength"
-#     }
-#   }
-#   spec {
-#     replicas = 1
-#     selector {
-#       match_labels = {
-#         app = "app-wavelength"
-#       }
-#     }
-#     template {
-#       metadata {
-#         labels = {
-#           app = "app-wavelength"
-#         }
-#       }
+resource "kubernetes_deployment" "app-wavelength-deployment" {
+  metadata {
+    name      = "wavelength-deployment"
+    namespace = "distributed-app-wavelength"
+    labels = {
+      app = "app-wavelength"
+    }
+  }
+  spec {
+    replicas = 1
+    selector {
+      match_labels = {
+        app = "app-wavelength"
+      }
+    }
+    template {
+      metadata {
+        labels = {
+          app = "app-wavelength"
+        }
+      }
 
-#       spec {
-#         toleration {
-#           key      = "app"
-#           value    = "app-wavelength"
-#           operator = "Equal"
-#           effect   = "NoSchedule"
-#         }
-#         container {
-#           name  = "nginx"
-#           image = "public.ecr.aws/nginx/nginx:1.23"
-#           port {
-#             name           = "http"
-#             container_port = 80
-#           }
-#           image_pull_policy = "IfNotPresent"
-#         }
-#         node_selector = {
-#           "kubernetes.io/os" = "linux"
-#         }
-#       }
-#     }
-#   }
-#   depends_on = [
-#     kubernetes_node_taint.wavelength,
-#     kubernetes_node_taint.localzone
-#     kubernetes_node_taint.region
-#   ]
-# }
+      spec {
+        toleration {
+          key      = "app"
+          value    = "app-wavelength"
+          operator = "Equal"
+          effect   = "NoSchedule"
+        }
+        host_network = true
+        container {
+          name  = "nginx"
+          image = "public.ecr.aws/e2t7i0t3/sample-edge-app:4"
+          port {
+            name           = "http"
+            container_port = 80
+          }
+          image_pull_policy = "IfNotPresent"
+          env {
+            name  = "AWS_ZONE"
+            value = lookup(var.wavelength_zone, var.edge_city)
+          }
+          env {
+            name  = "EDGE_CITY"
+            value = var.edge_city
+          }
+        }
+        node_selector = {
+          "kubernetes.io/os" = "linux"
+        }
+      }
+    }
+  }
+  depends_on = [
+    kubernetes_node_taint.wavelength,
+    kubernetes_node_taint.localzone,
+    kubernetes_node_taint.region
+  ]
+}
 
-# resource "kubernetes_service" "app-wavelength-service" {
-#   metadata {
-#     name      = "wavelength-service"
-#     namespace = "distributed-app-wavelength"
-#   }
-#   spec {
-#     selector = {
-#       "app" = "app-wavelength"
-#     }
-#     port {
-#       port        = 80
-#       target_port = 80
-#       node_port   = 30002
-#       name        = "wavelength-port"
-#       protocol    = "TCP"
-#     }
+resource "kubernetes_service" "app-wavelength-service" {
+  metadata {
+    name      = "wavelength-service"
+    namespace = "distributed-app-wavelength"
+  }
+  spec {
+    selector = {
+      "app" = "app-wavelength"
+    }
+    external_traffic_policy = "Local"
+    port {
+      port        = 80
+      target_port = 80
+      node_port   = 30002
+      name        = "wavelength-port"
+      protocol    = "TCP"
+    }
 
-#     type = "NodePort"
-#   }
-# }
+    type = "NodePort"
+  }
+}
 
 output "region_address" {
   value = "http://${data.kubernetes_nodes.region.nodes[0].status[0].addresses[1].address}:30000"
