@@ -29,6 +29,15 @@ data "kubernetes_nodes" "wavelength" {
     }
   }
 }
+
+## Terraform doesn't really understand wavelength, so lets manually
+## create an EIP on the CGW and attach it to our node
+resource "aws_eip" "wavelength_eip" {
+  domain                    = "vpc"
+  instance                  = data.kubernetes_nodes.wavelength.nodes[0].spec[0].provider_id
+  associate_with_private_ip = data.kubernetes_nodes.wavelength.nodes[0].status[0].addresses[0].address
+}
+
 ## this section creates a list of k8s nodes (ec2 instances) in the region
 ## we need this later to apply k8s taints
 data "kubernetes_nodes" "region" {
@@ -355,7 +364,8 @@ resource "kubernetes_deployment" "app-wavelength-deployment" {
   depends_on = [
     kubernetes_node_taint.wavelength,
     kubernetes_node_taint.localzone,
-    kubernetes_node_taint.region
+    kubernetes_node_taint.region,
+    aws_eip.wavelength_eip
   ]
 }
 
