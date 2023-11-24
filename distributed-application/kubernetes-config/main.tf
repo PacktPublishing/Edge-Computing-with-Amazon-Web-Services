@@ -66,9 +66,9 @@ resource "local_sensitive_file" "kubeconfig" {
 }
 
 ## create the namespaces, one for each location type
-resource "kubernetes_namespace" "app-wavelength" {
+resource "kubernetes_namespace" "distributed-app-wavelength" {
   metadata {
-    name = "app-wavelength"
+    name = "distributed-app-wavelength"
 
     labels = {
       app = "app-wavelength"
@@ -76,9 +76,9 @@ resource "kubernetes_namespace" "app-wavelength" {
   }
 }
 
-resource "kubernetes_namespace" "app-localzone" {
+resource "kubernetes_namespace" "distributed-app-localzone" {
   metadata {
-    name = "app-localzone"
+    name = "distributed-app-localzone"
 
     labels = {
       app = "app-localzone"
@@ -86,9 +86,9 @@ resource "kubernetes_namespace" "app-localzone" {
   }
 }
 
-resource "kubernetes_namespace" "app-region" {
+resource "kubernetes_namespace" "distributed-app-region" {
   metadata {
-    name = "app-region"
+    name = "distributed-app-region"
 
     labels = {
       app = "app-region"
@@ -107,6 +107,18 @@ resource "kubernetes_node_taint" "localzone" {
   taint {
     key    = "app"
     value  = "app-localzone"
+    effect = "NoSchedule"
+  }
+}
+
+resource "kubernetes_node_taint" "wavelength" {
+  count = length(data.kubernetes_nodes.wavelength.nodes)
+  metadata {
+    name = data.kubernetes_nodes.wavelength.nodes[count.index].metadata.0.name
+  }
+  taint {
+    key    = "app"
+    value  = "app-wavelength"
     effect = "NoSchedule"
   }
 }
@@ -377,6 +389,6 @@ output "localzone_address" {
   value = "http://${data.kubernetes_nodes.localzone.nodes[0].status[0].addresses[1].address}:30001"
 }
 
-# output "wavelength_address" {
-#   value = "http://${data.kubernetes_nodes.wavelength.nodes[0].status[0].addresses[1].address}:30002"
-# }
+output "wavelength_address" {
+  value = "http://${data.kubernetes_nodes.wavelength.nodes[0].status[0].addresses[1].address}:30002"
+}

@@ -49,12 +49,12 @@ variable "local_zone" {
     newyorkcity  = "us-east-1-nyc-1a"
     phoenix      = "us-west-2-phx-2a"
     seattle      = "us-west-2-sea-1a"
-    london       = "eu-west-2c"
-    osaka        = "ap-northeast-1c"
-    sanfrancisco = "us-west-2c"
-    seoul        = "ap-northeast-2c"
-    tokyo        = "ap-northeast-1c"
-    washingtondc = "us-east-1c"
+    london       = "eu-west-2b"
+    osaka        = "ap-northeast-1b"
+    sanfrancisco = "us-west-2b"
+    seoul        = "ap-northeast-2b"
+    tokyo        = "ap-northeast-1b"
+    washingtondc = "us-east-1b"
   }
 }
 
