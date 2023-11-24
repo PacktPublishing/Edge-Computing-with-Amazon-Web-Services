@@ -80,7 +80,7 @@ resource "aws_subnet" "true-local-zone-subnet" {
 
 resource "aws_subnet" "false-local-zone-subnet" {
   count                                       = lookup(var.true_local_zone, var.edge_city) ? 0 : 1
-  availability_zone_id                        = lookup(var.local_zone_id, var.edge_city)
+  availability_zone                           = lookup(var.local_zone, var.edge_city)
   cidr_block                                  = "10.0.3.0/24"
   vpc_id                                      = aws_vpc.k8s-distributed.id
   map_public_ip_on_launch                     = true
