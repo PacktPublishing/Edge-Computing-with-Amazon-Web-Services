@@ -54,12 +54,12 @@ variable "local_zone" {
     newyorkcity  = "us-east-1-nyc-1a"
     phoenix      = "us-west-2-phx-2a"
     seattle      = "us-west-2-sea-1a"
-    london       = "eu-west-2b"
-    osaka        = "ap-northeast-1b"
-    sanfrancisco = "us-west-2b"
-    seoul        = "ap-northeast-2b"
-    tokyo        = "ap-northeast-1b"
-    washingtondc = "us-east-1b"
+    london       = "eu-west-2c"
+    osaka        = "ap-northeast-1c"
+    sanfrancisco = "us-west-2c"
+    seoul        = "ap-northeast-2c"
+    tokyo        = "ap-northeast-1c"
+    washingtondc = "us-east-1c"
   }
 }
 variable "parent_region" {
@@ -179,12 +179,12 @@ variable "local_zone_id" {
     newyorkcity  = "use1-nyc1-az1"
     phoenix      = "usw2-phx2-az1"
     seattle      = "usw2-sea1-az1"
-    london       = "euw2-az3"
-    osaka        = "apne1-az4"
-    sanfrancisco = "usw2-az3"
-    seoul        = "apne2-az3"
-    tokyo        = "apne1-az4"
-    washingtondc = "use1-az3"
+    london       = "eu-west-2c"
+    osaka        = "ap-northeast-2c"
+    sanfrancisco = "us-west-2c"
+    seoul        = "ap-northeast-2c"
+    tokyo        = "ap-northeast-1c"
+    washingtondc = "us-east-1c"
   }
 }
 

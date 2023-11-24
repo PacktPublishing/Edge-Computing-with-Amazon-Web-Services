@@ -30,11 +30,15 @@ data "kubernetes_nodes" "wavelength" {
   }
 }
 
+locals {
+  instance_id_list = split("/", data.kubernetes_nodes.wavelength.nodes[0].spec[0].provider_id)
+}
+
 ## Terraform doesn't really understand wavelength, so lets manually
 ## create an EIP on the CGW and attach it to our node
 resource "aws_eip" "wavelength_eip" {
   domain                    = "vpc"
-  instance                  = data.kubernetes_nodes.wavelength.nodes[0].spec[0].provider_id
+  instance                  = element(local.instance_id_list, length(local.instance_id_list) - 1)
   associate_with_private_ip = data.kubernetes_nodes.wavelength.nodes[0].status[0].addresses[0].address
 }
 
@@ -400,5 +404,5 @@ output "localzone_address" {
 }
 
 output "wavelength_address" {
-  value = "http://${data.kubernetes_nodes.wavelength.nodes[0].status[0].addresses[1].address}:30002"
+  value = "http://${aws_eip.wavelength_eip.public_ip}:30002"
 }

@@ -61,7 +61,25 @@ resource "aws_subnet" "parent-region-subnet-b" {
 
 ## Create a subnet in the relevant AWS Local Zone
 ## Note: AZ c in the parent region is used if no Local Zone exists there
-resource "aws_subnet" "local-zone-subnet" {
+
+resource "aws_subnet" "true-local-zone-subnet" {
+  count                                       = lookup(var.true_local_zone, var.edge_city) ? 1 : 0
+  availability_zone_id                        = lookup(var.local_zone_id, var.edge_city)
+  cidr_block                                  = "10.0.3.0/24"
+  vpc_id                                      = aws_vpc.k8s-distributed.id
+  map_public_ip_on_launch                     = true
+  enable_resource_name_dns_a_record_on_launch = true
+  private_dns_hostname_type_on_launch         = "ip-name"
+
+  tags = {
+    Name                                        = "${var.cluster_name}-local-zone-subnet"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                    = 1
+  }
+}
+
+resource "aws_subnet" "false-local-zone-subnet" {
+  count                                       = lookup(var.true_local_zone, var.edge_city) ? 0 : 1
   availability_zone_id                        = lookup(var.local_zone_id, var.edge_city)
   cidr_block                                  = "10.0.3.0/24"
   vpc_id                                      = aws_vpc.k8s-distributed.id
@@ -148,10 +166,11 @@ resource "aws_route_table_association" "k8s-distributed-region-rta-b" {
   route_table_id = aws_route_table.k8s-distributed-region-rt.id
 }
 
-resource "aws_route_table_association" "k8s-distributed-region-rta-c" {
-  subnet_id      = aws_subnet.local-zone-subnet.id
+resource "aws_route_table_association" "k8s-distributed-region-rta-local-zone" {
+  subnet_id      = lookup(var.true_local_zone, var.edge_city) == true ? aws_subnet.true-local-zone-subnet[0].id : aws_subnet.false-local-zone-subnet[0].id
   route_table_id = aws_route_table.k8s-distributed-region-rt.id
 }
+
 
 ## Only the Wavelength Zone subnet gets associated to the special route table
 resource "aws_route_table_association" "k8s-distributed-wavelength-rta" {

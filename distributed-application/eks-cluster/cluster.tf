@@ -107,7 +107,7 @@ module "self_managed_node_group_local_zone" {
   cluster_endpoint    = aws_eks_cluster.k8s-distributed.endpoint
   cluster_auth_base64 = aws_eks_cluster.k8s-distributed.certificate_authority[0].data
 
-  subnet_ids = [aws_subnet.local-zone-subnet.id]
+  subnet_ids = lookup(var.true_local_zone, var.edge_city) == true ? [aws_subnet.true-local-zone-subnet[0].id] : [aws_subnet.false-local-zone-subnet[0].id]
 
   vpc_security_group_ids = [
     aws_security_group.node_sg.id
@@ -126,6 +126,7 @@ module "self_managed_node_group_local_zone" {
   }
 
 }
+
 
 ## This is how the k8s configmaps are created. These translate internal k8s RBAC
 ## to AWS IAM users/roles. We're allowing admin rights to whatever user deployed
@@ -164,7 +165,8 @@ locals {
         "system:bootstrappers",
         "system:nodes",
       ]
-    },
+    }
+
   ]
 
   aws_auth_configmap_data = {

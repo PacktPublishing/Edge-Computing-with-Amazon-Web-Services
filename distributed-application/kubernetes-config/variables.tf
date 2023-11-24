@@ -49,62 +49,12 @@ variable "local_zone" {
     newyorkcity  = "us-east-1-nyc-1a"
     phoenix      = "us-west-2-phx-2a"
     seattle      = "us-west-2-sea-1a"
-    london       = "eu-west-2b"
-    osaka        = "ap-northeast-1b"
-    sanfrancisco = "us-west-2b"
-    seoul        = "ap-northeast-2b"
-    tokyo        = "ap-northeast-1b"
-    washingtondc = "us-east-1b"
-  }
-}
-
-variable "wavelength_zone_id" {
-  type = map(any)
-  default = {
-    atlanta      = "use1-wl1-atl-wlz1"
-    boston       = "use1-wl1-bos-wlz1"
-    chicago      = "use1-wl1-chi-wlz1"
-    dallas       = "use1-wl1-dfw-wlz1"
-    denver       = "usw2-wl1-den-wlz1"
-    houston      = "use1-wl1-iah-wlz1"
-    lasvegas     = "usw2-wl1-las-wlz1"
-    losangeles   = "usw2-wl1-lax-wlz1"
-    miami        = "use1-wl1-mia-wlz1"
-    minneapolis  = "use1-wl1-msp-wlz1"
-    newyorkcity  = "use1-wl1-nyc-wlz1"
-    phoenix      = "usw2-wl1-phx-wlz1"
-    seattle      = "usw2-wl1-sea-wlz1"
-    london       = "euw2-wl1-lon-wlz1"
-    osaka        = "apne1-wl1-kix-wlz1"
-    sanfrancisco = "usw2-wl1-sfo-wlz1"
-    seoul        = "apne2-wl1-sel-wlz1"
-    tokyo        = "apne1-wl1-nrt-wlz1"
-    washingtondc = "use1-wl1-was-wlz1"
-  }
-}
-
-variable "local_zone_id" {
-  type = map(any)
-  default = {
-    atlanta      = "use1-atl1-az1"
-    boston       = "use1-bos1-az1"
-    chicago      = "use1-chi1-az1"
-    dallas       = "use1-dfw2-az1"
-    denver       = "usw2-den1-az1"
-    houston      = "use1-iah1-az1"
-    lasvegas     = "usw2-las1-az1"
-    losangeles   = "usw2-lax1-az1"
-    miami        = "use1-mia1-az1"
-    minneapolis  = "use1-msp1-az1"
-    newyorkcity  = "use1-nyc1-az1"
-    phoenix      = "usw2-phx2-az1"
-    seattle      = "usw2-sea1-az1"
-    london       = "euw2-az3"
-    osaka        = "apne1-az4"
-    sanfrancisco = "usw2-az3"
-    seoul        = "apne2-az3"
-    tokyo        = "apne1-az4"
-    washingtondc = "use1-az3"
+    london       = "eu-west-2c"
+    osaka        = "ap-northeast-1c"
+    sanfrancisco = "us-west-2c"
+    seoul        = "ap-northeast-2c"
+    tokyo        = "ap-northeast-1c"
+    washingtondc = "us-east-1c"
   }
 }
 
