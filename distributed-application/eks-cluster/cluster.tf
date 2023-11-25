@@ -45,8 +45,7 @@ module "self_managed_node_group_parent_region" {
   cluster_auth_base64 = aws_eks_cluster.k8s-distributed.certificate_authority[0].data
 
   subnet_ids = [
-    aws_subnet.parent-region-subnet-a.id,
-    aws_subnet.parent-region-subnet-b.id
+    aws_subnet.parent-region-subnet-a.id
   ]
 
   vpc_security_group_ids = [

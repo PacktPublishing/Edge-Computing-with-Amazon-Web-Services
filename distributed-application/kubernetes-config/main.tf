@@ -50,8 +50,7 @@ resource "aws_eip" "wavelength_eip" {
 data "kubernetes_nodes" "region" {
   metadata {
     labels = {
-      "topology.kubernetes.io/zone" = "${lookup(var.parent_region, var.edge_city)}a",
-      "topology.kubernetes.io/zone" = "${lookup(var.parent_region, var.edge_city)}b"
+      "topology.kubernetes.io/zone" = "${lookup(var.parent_region, var.edge_city)}a"
     }
   }
 }
