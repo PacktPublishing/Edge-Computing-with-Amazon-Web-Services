@@ -2,3 +2,6 @@
 *claim-certs*
 distributed-application/nginx-php*
 
+out/linecounter.json
+out/linecounter.txt
+
