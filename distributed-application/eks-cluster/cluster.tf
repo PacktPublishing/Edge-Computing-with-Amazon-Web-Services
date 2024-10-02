@@ -43,6 +43,7 @@ module "self_managed_node_group_parent_region" {
   cluster_version     = var.kubernetes_version
   cluster_endpoint    = aws_eks_cluster.k8s-distributed.endpoint
   cluster_auth_base64 = aws_eks_cluster.k8s-distributed.certificate_authority[0].data
+  cluster_service_cidr = "172.20.0.0/16"
 
   subnet_ids = [
     aws_subnet.parent-region-subnet-a.id
@@ -75,6 +76,7 @@ module "self_managed_node_group_wavelength" {
   cluster_version     = var.kubernetes_version
   cluster_endpoint    = aws_eks_cluster.k8s-distributed.endpoint
   cluster_auth_base64 = aws_eks_cluster.k8s-distributed.certificate_authority[0].data
+  cluster_service_cidr = "172.20.0.0/16"
 
   subnet_ids = [aws_subnet.wavelength-zone-subnet.id]
 
@@ -105,6 +107,7 @@ module "self_managed_node_group_local_zone" {
   cluster_version     = var.kubernetes_version
   cluster_endpoint    = aws_eks_cluster.k8s-distributed.endpoint
   cluster_auth_base64 = aws_eks_cluster.k8s-distributed.certificate_authority[0].data
+  cluster_service_cidr = "172.20.0.0/16"
 
   subnet_ids = lookup(var.true_local_zone, var.edge_city) == true ? [aws_subnet.true-local-zone-subnet[0].id] : [aws_subnet.false-local-zone-subnet[0].id]
 
