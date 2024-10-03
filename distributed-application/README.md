@@ -1,3 +1,11 @@
+## Follow these steps to create an EKS-based distributed application
+
+This will create node groups in the parent region, a local zone, and a wavelength zone
+
+[![Overview](figure-1-small.png)](figure-1.png)
+
+(click image to enlarge)
+
 ## Create EKS cluster
 
 Change into the eks-cluster directory and create the EKS cluster infrastructure.
