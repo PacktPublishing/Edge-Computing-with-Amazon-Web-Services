@@ -73,7 +73,7 @@ module "self_managed_node_group_parent_region" {
   }
 
   depends_on = [
-    aws_eks_cluster.k8s-distributed.endpoint,
+    aws_eks_cluster.k8s-distributed,
     aws_security_group_rule.allow_private_subnet_to_eks_cluster
   ]
 
@@ -109,7 +109,7 @@ module "self_managed_node_group_wavelength" {
   }
 
   depends_on = [
-    aws_eks_cluster.k8s-distributed.endpoint,
+    aws_eks_cluster.k8s-distributed,
     aws_security_group_rule.allow_private_subnet_to_eks_cluster
   ]
 
@@ -145,7 +145,7 @@ module "self_managed_node_group_local_zone" {
   }
 
   depends_on = [
-    aws_eks_cluster.k8s-distributed.endpoint,
+    aws_eks_cluster.k8s-distributed,
     aws_security_group_rule.allow_private_subnet_to_eks_cluster
   ]
 
