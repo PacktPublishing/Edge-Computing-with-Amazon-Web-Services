@@ -27,12 +27,19 @@ resource "aws_eks_cluster" "k8s-distributed" {
     endpoint_public_access  = true
     endpoint_private_access = true
   }
+  
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
 
   depends_on = [
     aws_iam_role_policy_attachment.k8s-distributed-AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.k8s-distributed-AmazonEKSVPCResourceController,
   ]
 }
+
+
 
 ## this uses a module to deploy a self-managed node group to the Parent Region
 module "self_managed_node_group_parent_region" {
