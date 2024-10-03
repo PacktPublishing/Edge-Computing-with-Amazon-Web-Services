@@ -72,6 +72,11 @@ module "self_managed_node_group_parent_region" {
     Terraform   = "true"
   }
 
+  depends_on = [
+    aws_eks_cluster.k8s-distributed.endpoint,
+    aws_security_group_rule.allow_private_subnet_to_eks_cluster
+  ]
+
 }
 
 ## this uses a module to deploy a self-managed node group to the AWS Wavelength Zone
@@ -103,6 +108,11 @@ module "self_managed_node_group_wavelength" {
     Terraform   = "true"
   }
 
+  depends_on = [
+    aws_eks_cluster.k8s-distributed.endpoint,
+    aws_security_group_rule.allow_private_subnet_to_eks_cluster
+  ]
+
 }
 
 ## this uses a module to deploy a self-managed node group to the AWS Local Zone
@@ -133,6 +143,11 @@ module "self_managed_node_group_local_zone" {
     Environment = "local_zone"
     Terraform   = "true"
   }
+
+  depends_on = [
+    aws_eks_cluster.k8s-distributed.endpoint,
+    aws_security_group_rule.allow_private_subnet_to_eks_cluster
+  ]
 
 }
 
