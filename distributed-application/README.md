@@ -6,6 +6,12 @@ This will create node groups in the parent region, a local zone, and a wavelengt
 
 (click image to enlarge)
 
+## Prerequisites
+
+1. terraform
+2. eksctl
+3. awscli
+
 ## Create EKS cluster
 
 Change into the eks-cluster directory and create the EKS cluster infrastructure.
@@ -27,6 +33,25 @@ terraform init
 terraform apply -var=edge_city=losangeles -auto-approve
 cd ..
 ```
+
+## Create your local kubectl config file with a one-liner using the AWS CLI
+
+```
+aws eks update-kubeconfig --region <your region> --name distributedcluster
+```
+For example:
+
+```
+aws eks update-kubeconfig --region us-west-2 --name distributedcluster
+```
+
+Now view your local kubectl config:
+
+```
+kubectl config view
+```
+
+It should be all ready to go with IAM authentication
 
 ## Create oidc (optional)
 
